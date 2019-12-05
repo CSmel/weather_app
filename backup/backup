@@ -1,0 +1,116 @@
+<template>
+  <div class="container" id="app">
+    <h3 class="text-center">Weather News</h3>
+    <div class="grid-container top">
+      <div class="location-image"></div>
+      <div class="row align-middle">
+        <h1>{{ currently.temperature}}&#176;</h1>
+        <p> {{ currently.icon }}</p>
+        <skycon v-bind:condition="currently.icon" />
+      </div><!-- end of first row -->
+
+    </div>
+    <div class="grid-container">
+      <div class="row">
+        <h4>7 Day Forecast</h4>
+        <div class="columns small-1"  v-for="day in daily.data">
+          <div class="card">
+            <div class="card-section" >
+              <p>{{ day.time | moment("dddd, MMMM Do YYYY, h:mm:ss a")   }}</p>
+              <skycon v-bind:condition="day.icon" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+
+</template>
+
+<script>
+
+  import axios from 'axios';
+
+  export default {
+    name: 'app',
+
+
+    data() {
+      return {
+        day: [],
+        hour: [],
+      }
+    },
+    props: {
+      // Icon size
+      width: {
+        type: Number,
+        default: 64
+      },
+
+      height: {
+        type: Number,
+        default: 64
+      },
+
+    },
+    mounted() {
+
+      axios.get("https://cors-anywhere.herokuapp.com/https://api.darksky.net/forecast/051b6680f036e325eecb49001964cdae/27.496,-82.594")
+        .then(response => {
+          this.currently = response.data.currently
+        });
+      axios.get("https://cors-anywhere.herokuapp.com/https://api.darksky.net/forecast/051b6680f036e325eecb49001964cdae/27.496,-82.594")
+        .then(response => {
+          this.daily = response.data.daily
+        });
+      axios.get("https://cors-anywhere.herokuapp.com/https://api.darksky.net/forecast/051b6680f036e325eecb49001964cdae/27.496,-82.594")
+        .then(response => {
+          this.results = response.data
+        });
+      axios.get("https://cors-anywhere.herokuapp.com/https://api.darksky.net/forecast/051b6680f036e325eecb49001964cdae/27.496,-82.594")
+        .then(response => {
+          this.hourly = response.data.hourly
+        });
+    },
+    computed: {
+    }
+  }
+</script>
+
+<style>
+  .container{
+    border: 2px solid red;
+    height: 100vh;
+  }
+  .row{
+    max-width: 100vw;
+  }
+  .top{
+
+    border: 2px solid blue;
+    width:100vw;
+    height:40%;
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+    left: 0;
+    right: 0;
+  }
+  .location-image {
+    background-image: url('https://static.55places.com/blog/media/siesta-85be88515bc8f7d6171a2806bd049094.jpg');
+    background-position: center;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    background-repeat: no-repeat;
+    margin-left: auto;
+    margin-right: auto;
+    left: 0;
+    right: 0;
+    opacity: 0.3;
+  }
+
+</style>

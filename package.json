@@ -1,0 +1,47 @@
+{
+  "name": "weather_app",
+  "description": "A Vue.js project",
+  "version": "1.0.0",
+  "author": "csmel <melsakas@gmail.com>",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development webpack-dev-server --open --hot",
+    "build": "cross-env NODE_ENV=production webpack --progress --hide-modules"
+  },
+  "dependencies": {
+    "axios": "^0.19.0",
+    "bootstrap": "^4.4.1",
+    "bootstrap-vue": "^2.1.0",
+    "foundation": "^4.2.1-1",
+    "foundation-sites": "^6.5.3",
+    "vue": "^2.6.10",
+    "vue-axios": "^2.1.5",
+    "vue-better-google-places-autocomplete": "^1.1.0",
+    "vue-google-autocomplete": "^1.1.0",
+    "vue-google-places": "^0.1.6",
+    "vue-moment": "^4.0.0",
+    "vue-skycons": "^1.0.5",
+    "vue-weather-widget": "^2.4.0",
+    "vuejs-progress-bar": "^1.1.1",
+    "vuetify": "^2.1.12"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not ie <= 8"
+  ],
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-preset-env": "^1.6.0",
+    "babel-preset-stage-3": "^6.24.1",
+    "cross-env": "^5.0.5",
+    "css-loader": "^0.28.7",
+    "file-loader": "^1.1.4",
+    "vue-loader": "^13.0.5",
+    "vue-template-compiler": "^2.4.4",
+    "webpack": "^3.6.0",
+    "webpack-dev-server": "^2.9.1"
+  }
+}
