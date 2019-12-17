@@ -1,4 +1,5 @@
 import Vue from 'vue'
+
 import App from './App.vue'
 import VueSkycons from 'vue-skycons'
 import ProgressBar from 'vuejs-progress-bar'

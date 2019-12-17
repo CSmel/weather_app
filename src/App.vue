@@ -4,18 +4,20 @@
       <div class="grid-x grid-margin-x">
         <div class="cell small-3">
           <h5>Search For A Location</h5>
-          <input type="search" id="search-input" placeholder="Start Searching..." />
-<div id="form-longtitude">{{ latitudeDis }}</div>
-
-          <div id="form-latitude">{{ longitudeDis }}</div>
+          <input type="search" id="search-input" placeholder="Start Searching..."/>
+          <div id="form-longtitude"></div>
+          <div id="form-latitude"></div>
         </div>
         <div class="cell auto">
           <div class="grid-y grid-margin-y">
             <div class="cell main-image-parent">
               <div class="main"></div>
               <div class="grid-x align-spaced grid-margin-x ">
-                <div class="current-temp cell"><h1>{{ currently.temperature}}&#176;</h1>
-                  <p> {{ currently.time }}</p>
+                <div class="current-temp cell">
+                  <div id="form-city">,</div>
+                  <div id="form-state"></div>
+                  <h1>{{ currently.temperature}}&#176;</h1>
+                  <p> {{ currently.summary }}
                   <p> {{ currently.timezone }}</p>
                   {{currently.longitude}}
                   <skycon v-bind:condition="currently.icon"/>
@@ -39,8 +41,6 @@
                 <p>{{ day.temperatureLow}}&#176;</p>
               </div>
             </div>
-
-
             <div class=" grid-x align-spaced small-up-2 medium-up-2 large-up-4">
               <div class="cell">
                 <h4>Percipitation</h4>
@@ -79,10 +79,7 @@
                 <p>{{ alert.title }}</p>
               </div>
             </div>
-
           </div>
-
-
         </div>
       </div>
     </div>
@@ -95,13 +92,13 @@
     name: 'app',
     data() {
       return {
-        longitudeDis: '',
-        latitudeDis: '',
         address: '',
+        latNum: '0',
+        longNum: '0',
         day: [],
         hour: [],
-        alerts:'',
-currently: '',
+        alerts: '',
+        currently: '',
         hourly: '',
         options: {
           text: {
@@ -142,17 +139,24 @@ currently: '',
       },
 
     },
+    updated: function () {
+      this.$nextTick(function () {
+        this.waitAminute();
+      })
+    },
     mounted() {
-this.waitAminute();
 
+      //this.setCoordinates();
       axios.get("https://cors-anywhere.herokuapp.com/https://api.darksky.net/forecast/051b6680f036e325eecb49001964cdae/27.496,-82.594")
         .then(response => {
           this.currently = response.data.currently
         });
+
       axios.get("https://cors-anywhere.herokuapp.com/https://api.darksky.net/forecast/051b6680f036e325eecb49001964cdae/27.496,-82.594")
         .then(response => {
           this.daily = response.data.daily
         });
+
       axios.get("https://cors-anywhere.herokuapp.com/https://api.darksky.net/forecast/051b6680f036e325eecb49001964cdae/27.496,-82.594")
         .then(response => {
           this.hourly = response.data.hourly
@@ -161,36 +165,67 @@ this.waitAminute();
         .then(response => {
           this.alerts = response.data.alerts
         });
-
-
     },
     computed: {},
+
+
     methods: {
+      /*  setCoordinates: function(){
+          this.latNum = '0';
+          this.longNum = '0';
+
+          axios.get("https://cors-anywhere.herokuapp.com/https://api.darksky.net/forecast/051b6680f036e325eecb49001964cdae/" + this.latNum + ","+ this.longNum)
+            .then(response => {
+              this.currently = response.data.currently
+            });
+
+        },*/
+
       waitAminute: function () {
-        setTimeout(function () {
+
+        this.ps = placeSearch({
+          key: 'dlWrWcvQDTvdOpJqrIkkepoKexYGixQa',
+          container: document.querySelector('#search-input'),
+          useDeviceLocation: true,
+          collection: [
+            'poi',
+          ]
+        });
+
+        this.ps.on('change', (e) => {
+          this.latNum = e.result.latlng.lat;
+          this.longNum = e.result.latlng.lng;
+          this.city = e.result.city;
+          this.state = e.result.state;
+          //this.longNumGlobal = e.result.latlng.lng;
+          axios.get('https://cors-anywhere.herokuapp.com/https://api.darksky.net/forecast/051b6680f036e325eecb49001964cdae/' + this.latNum + ',' + this.longNum)
+            .then(response => {
+              this.currently = response.data.currently
+            });
+
+          axios.get('https://cors-anywhere.herokuapp.com/https://api.darksky.net/forecast/051b6680f036e325eecb49001964cdae/' + this.latNum + ',' + this.longNum)
+            .then(response => {
+              this.daily = response.data.daily
+            });
+
+          axios.get('https://cors-anywhere.herokuapp.com/https://api.darksky.net/forecast/051b6680f036e325eecb49001964cdae/' + this.latNum + ',' + this.longNum)
+            .then(response => {
+              this.hourly = response.data.hourly
+            });
+          axios.get('https://cors-anywhere.herokuapp.com/https://api.darksky.net/forecast/051b6680f036e325eecb49001964cdae/' + this.latNum + ',' + this.longNum)
+            .then(response => {
+              this.alerts = response.data.alerts
+            });
+          //this.longNumGlobal = e.result.latlng.lng;
+          // this.longNumDefault = e.result.latlng.lng;
+          // this.latNumGlobal = e.result.latlng.lat;
+          document.querySelector('#form-longtitude').innerHTML = e.result.latlng.lng;
+          document.querySelector('#form-latitude').innerHTML = e.result.latlng.lat;
+          document.querySelector('#form-city').innerHTML = e.result.city;
+          document.querySelector('#form-state').innerHTML = e.result.state;
+        });
 
 
-          let ps =  placeSearch({
-            key: 'dlWrWcvQDTvdOpJqrIkkepoKexYGixQa',
-            container: document.querySelector('#search-input'),
-            useDeviceLocation: true,
-            collection: [
-              'poi',
-
-
-            ]
-          });
-
-          ps.on('change', (e) => {
-
-            let longitude = e.result.latlng.lng;
-            let latitude = e.result.latlng.lat;
-            document.querySelector('#form-longtitude').innerHTML =  e.result.latlng.lng ;
-alert( longitude);
-alert(latitude)
-          });
-
-        }, 1000)
       }
     }
   }
@@ -219,10 +254,12 @@ alert(latitude)
   .alternate-color:nth-child(odd) {
     background-color: #5C5C5C;
   }
-.main-image-parent{
-  position: relative;
-  z-index: 1;
-}
+
+  .main-image-parent {
+    position: relative;
+    z-index: 1;
+  }
+
   .main {
     min-height: 100%;
     background-image: url("https://www.sarasotapost.com/images/Bradenton3.jpg");
@@ -233,16 +270,5 @@ alert(latitude)
     width: 100%;
     z-index: -1;
 
-  }
-
-  .search-location {
-    width: 15vw;
-
-    font-weight: 400;
-    outline: none;
-    height: 30px;
-    line-height: 30px;
-    text-align: center;
-    border-radius: 10px;
   }
 </style>
