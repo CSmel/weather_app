@@ -5,22 +5,26 @@
         <div class="cell small-3">
           <h5>Search For A Location</h5>
           <input type="search" id="search-input" placeholder="Start Searching..."/>
-          <div id="form-longtitude"></div>
-          <div id="form-latitude"></div>
+          <form>
+            <input class="fakeInput" v-model="tagSearch" type="text">
+            <button type="submit" class="go-button fakeInput" @click.prevent="search">Search</button>
+          </form>
         </div>
         <div class="cell auto">
           <div class="grid-y grid-margin-y">
             <div class="cell main-image-parent">
-              <div class="main"></div>
+              <div v-for="image in images" :key="image.id">
+                <img class="main" :src="image.url_n" :alt="image.title">
+                <div>
+                </div>
+              </div>
               <div class="grid-x align-spaced grid-margin-x ">
                 <div class="current-temp cell">
-                  <div id="form-city">,</div>
-                  <div id="form-state"></div>
-                  <h1>{{ currently.temperature}}&#176;</h1>
-                  <p> {{ currently.summary }}
-                  <p> {{ currently.timezone }}</p>
-                  {{currently.longitude}}
-                  <skycon v-bind:condition="currently.icon"/>
+                  <h1>{{ cityDisplay}},</h1>
+                  <h1>{{ stateDisplay }}</h1>
+                  <h1>{{ currently.temperature}}&#176;
+                    <skycon v-bind:condition="currently.icon"/>
+                  </h1>
                 </div>
               </div>
               Daily Forecast
@@ -41,7 +45,7 @@
                 <p>{{ day.temperatureLow}}&#176;</p>
               </div>
             </div>
-            <div class=" grid-x align-spaced small-up-2 medium-up-2 large-up-4">
+            <div class=" grid-x align-spaced small-up-2 medium-up-2 large-up-3">
               <div class="cell">
                 <h4>Percipitation</h4>
                 <progress-bar
@@ -49,34 +53,42 @@
                     v-bind:value="currently.nearestStormBearing"
                 />
               </div>
-              <div class="cell">
+              <div class="cell filter">
                 <h4>Humidity</h4>
                 <progress-bar
                     :options="options"
                     v-bind:value="currently.humidity"
                 />
               </div>
-              <div class="cell">
+              <div class="cell filter">
                 <h4>UV Index</h4>
                 <progress-bar
                     :options="options"
                     v-bind:value="currently.uvIndex"
                 />
               </div>
+            </div>
+            <div class="grid-x">
               <div class="cell">
-                <h4>Max Wind</h4>
-                <progress-bar
-                    :options="options"
-                    :value="80"
-                />
-              </div>
+                <h4>Alerts</h4></div>
+            </div>
+            <div class="grid-x align-spaced small-up-2 medium-up-2 large-up-4">
               <div class="cell callout alert auto" v-if="!alerts || !alerts.length">
-                <h4>Alerts</h4>
                 <p>No alerts, yet.</p>
               </div>
-              <div class="cell callout alert auto" v-for="alert in alerts.data" v-else>
-                <h4>Alerts</h4>
-                <p>{{ alert.title }}</p>
+              <div class="grid-x align-spaced small-up-2 medium-up-2 large-up-4" v-for="alert in alerts" v-else>
+                <div class="cell"><h5>Title</h5>
+                  <p>{{ alert.title }}</p></div>
+                <div class="cell"><h5>Severity</h5>
+                  <p>{{ alert.severity }}</p></div>
+                <div class="cell"><h5>Time</h5>
+                  <p>{{ alert.time | moment("h a")}}</p></div>
+                <div class="cell"><h5>Expires</h5>
+                  <p>{{ alert.expires | moment("h a")}}</p></div>
+                <div class="grid-x align-spaced ">
+                  <div class="cell large-9"><h5>Description</h5><span
+                      class="no-center"><p>{{ alert.description }}</p></span></div>
+                </div>
               </div>
             </div>
           </div>
@@ -86,20 +98,29 @@
   </div>
 </template>
 <script>
+  import config from '../config';
   import axios from 'axios';
 
   export default {
+
     name: 'app',
     data() {
       return {
+        loading: false,
+        tag: '',
+        images: [],
         address: '',
         latNum: '0',
         longNum: '0',
+        cityDisplay: 'Bradenton',
+        stateDisplay: 'Florida',
         day: [],
         hour: [],
-        alerts: '',
+        alert: [],
         currently: '',
         hourly: '',
+        daily: '',
+        alerts: '',
         options: {
           text: {
             color: '#fff',
@@ -145,50 +166,70 @@
       })
     },
     mounted() {
-
-      //this.setCoordinates();
       axios.get("https://cors-anywhere.herokuapp.com/https://api.darksky.net/forecast/051b6680f036e325eecb49001964cdae/27.496,-82.594")
-        .then(response => {
-          this.currently = response.data.currently
-        });
-
-      axios.get("https://cors-anywhere.herokuapp.com/https://api.darksky.net/forecast/051b6680f036e325eecb49001964cdae/27.496,-82.594")
-        .then(response => {
-          this.daily = response.data.daily
-        });
-
-      axios.get("https://cors-anywhere.herokuapp.com/https://api.darksky.net/forecast/051b6680f036e325eecb49001964cdae/27.496,-82.594")
-        .then(response => {
-          this.hourly = response.data.hourly
-        });
-      axios.get("https://cors-anywhere.herokuapp.com/https://api.darksky.net/forecast/051b6680f036e325eecb49001964cdae/27.496,-82.594")
-        .then(response => {
-          this.alerts = response.data.alerts
+        .then((response) => {
+          this.currently = response.data.currently;
+          this.daily = response.data.daily;
+          this.hourly = response.data.hourly;
+          this.alerts = response.data.alerts;
         });
     },
-    computed: {},
-
+    computed: {
+      tagSearch() {
+        return this.cityDisplay;
+      },
+    },
+    watch: {
+      cityDisplay: function () {
+        this.search();
+      },
+    },
 
     methods: {
-      /*  setCoordinates: function(){
-          this.latNum = '0';
-          this.longNum = '0';
+      // flickr
+      search() {
+        this.loading = true;
+        this.fetchImages()
+          .then((response) => {
+            this.images = response.data.photos.photo;
+            this.loading = false;
+          })
+      },
+      fetchImages() {
+        return axios({
+          method: 'get',
+          url: 'https://api.flickr.com/services/rest',
+          params: {
+            method: 'flickr.photos.search',
+            api_key: config.api_key,
+            text: this.tagSearch,
+            extras: 'url_n, owner_name, date_taken, views',
+            page: 1,
+            format: 'json',
+            nojsoncallback: 1,
+            per_page: 1,
+            sort: 'interestingness-desc'
 
-          axios.get("https://cors-anywhere.herokuapp.com/https://api.darksky.net/forecast/051b6680f036e325eecb49001964cdae/" + this.latNum + ","+ this.longNum)
-            .then(response => {
-              this.currently = response.data.currently
-            });
 
-        },*/
-
+          }
+        })
+      },
       waitAminute: function () {
+        // let aa = document.querySelectorAll("[id='cont']").value();
+        // for(let i=0;i<=aa.length;i++)
+        // {
+        //   aa[i].innerText = aa[i].innerText.replace("%","");
+
+        //   }
 
         this.ps = placeSearch({
           key: 'dlWrWcvQDTvdOpJqrIkkepoKexYGixQa',
           container: document.querySelector('#search-input'),
-          useDeviceLocation: true,
+          useDeviceLocation: false,
           collection: [
             'poi',
+            'address',
+            'adminArea',
           ]
         });
 
@@ -199,33 +240,16 @@
           this.state = e.result.state;
           //this.longNumGlobal = e.result.latlng.lng;
           axios.get('https://cors-anywhere.herokuapp.com/https://api.darksky.net/forecast/051b6680f036e325eecb49001964cdae/' + this.latNum + ',' + this.longNum)
-            .then(response => {
-              this.currently = response.data.currently
+            .then((response) => {
+              this.currently = response.data.currently;
+              this.daily = response.data.daily;
+              this.hourly = response.data.hourly;
+              this.alerts = response.data.alerts;
             });
-
-          axios.get('https://cors-anywhere.herokuapp.com/https://api.darksky.net/forecast/051b6680f036e325eecb49001964cdae/' + this.latNum + ',' + this.longNum)
-            .then(response => {
-              this.daily = response.data.daily
-            });
-
-          axios.get('https://cors-anywhere.herokuapp.com/https://api.darksky.net/forecast/051b6680f036e325eecb49001964cdae/' + this.latNum + ',' + this.longNum)
-            .then(response => {
-              this.hourly = response.data.hourly
-            });
-          axios.get('https://cors-anywhere.herokuapp.com/https://api.darksky.net/forecast/051b6680f036e325eecb49001964cdae/' + this.latNum + ',' + this.longNum)
-            .then(response => {
-              this.alerts = response.data.alerts
-            });
-          //this.longNumGlobal = e.result.latlng.lng;
-          // this.longNumDefault = e.result.latlng.lng;
-          // this.latNumGlobal = e.result.latlng.lat;
-          document.querySelector('#form-longtitude').innerHTML = e.result.latlng.lng;
-          document.querySelector('#form-latitude').innerHTML = e.result.latlng.lat;
-          document.querySelector('#form-city').innerHTML = e.result.city;
-          document.querySelector('#form-state').innerHTML = e.result.state;
+          this.cityDisplay = e.result.city;
+          this.stateDisplay = e.result.state;
+          this.search();
         });
-
-
       }
     }
   }
@@ -236,19 +260,26 @@
     color: #fff
   }
 
+  .fakeInput {
+    display: none
+  }
+
   .current-temp {
     min-height: 10vh;
     max-width: 40vw;
     background-color: transparent !important;
+    text-align: left !important;
   }
 
+  .no-center {
+    text-align: left !important;
+  }
 
   .cell {
     border-radius: 5px;
     padding: 10px;
     background-color: #545A5F;
     text-align: center;
-
   }
 
   .alternate-color:nth-child(odd) {
@@ -258,17 +289,30 @@
   .main-image-parent {
     position: relative;
     z-index: 1;
+    border: 2px solid green;
+    overflow: hidden;
   }
 
   .main {
+    height: auto;
+    width: 100%;
+    position: absolute;
+    left: 0;
+    margin-left: 0;
+    top: 0;
+    margin-top: 0;
     min-height: 100%;
-    background-image: url("https://www.sarasotapost.com/images/Bradenton3.jpg");
+
+    margin-right: 0;
     background-repeat: no-repeat;
     background-size: cover;
     opacity: 0.3;
-    position: absolute;
-    width: 100%;
-    z-index: -1;
 
+    z-index: -1;
+    border: 2px solid red
+  }
+
+  img {
+    display: inline !important;
   }
 </style>
