@@ -2,7 +2,7 @@
 
 > A Vue.js project
 #APIS
-###Mapquest API
+### Mapquest API
 > PlaceSearch.js
 https://developer.mapquest.com/documentation/place-search-js/v1.0/
 ### Flickr API 
