@@ -25,6 +25,7 @@
     "vue-numeral-filter": "^1.1.1",
     "vue-skycons": "^1.0.5",
     "vue-weather-widget": "^2.4.0",
+    "vuejs-progress-bar": "^1.2.0",
     "vuetify": "^2.1.12"
   },
   "browserslist": [

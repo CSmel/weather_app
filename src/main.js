@@ -2,7 +2,7 @@ import Vue from 'vue';
 
 import App from './App.vue';
 import VueSkycons from 'vue-skycons';
-import ProgressBar from './vuejs-progress-bar';
+import ProgressBar from 'vuejs-progress-bar';
 import vueNumeralFilterInstaller from 'vue-numeral-filter';
 const moment = require('moment');
 require('moment/locale/en-au');
