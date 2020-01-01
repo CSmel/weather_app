@@ -8,6 +8,7 @@
           <form>
             <input class="fakeInput" v-model="tagSearch" type="text">
             <button type="submit" class="go-button fakeInput" @click.prevent="search">Search</button>
+<button @click.prevent="formatNumber">format</button>
           </form>
         </div>
         <div class="cell auto">
@@ -43,24 +44,25 @@
                 <skycon v-bind:condition="day.icon"/>
                 <p>{{ day.temperatureHigh}}&#176;</p>
                 <p>{{ day.temperatureLow}}&#176;</p>
+
               </div>
             </div>
             <div class=" grid-x align-spaced small-up-2 medium-up-2 large-up-3">
               <div class="cell">
-                <h4>Percipitation</h4>
+                <h4>Precipitation</h4>
                 <progress-bar
                     :options="options"
-                    v-bind:value="currently.nearestStormBearing"
+                    v-bind:value="currently.precipitation"
                 />
               </div>
               <div class="cell filter">
                 <h4>Humidity</h4>
                 <progress-bar
                     :options="options"
-                    v-bind:value="currently.humidity"
+                    v-bind:value="currently.humidity | numeral('0b')"
                 />
               </div>
-              <div class="cell filter">
+              <div class="cell">
                 <h4>UV Index</h4>
                 <progress-bar
                     :options="options"
@@ -108,6 +110,8 @@
       return {
         loading: false,
         tag: '',
+        formatted: 0,
+        newNum: '',
         images: [],
         address: '',
         latNum: '0',
@@ -126,7 +130,7 @@
             color: '#fff',
             shadowEnable: false,
             shadowColor: '#000000',
-            fontSize: 15,
+            fontSize: 50,
             fontFamily: 'Helvetica',
             dynamicPosition: false,
             hideText: false
@@ -139,7 +143,7 @@
             height: 150,
             width: 150,
             verticalTextAlign: 90,
-            horizontalTextAlign: 5,
+            horizontalTextAlign: 70,
             zeroOffset: 0,
             strokeWidth: 10,
             progressPadding: 0,
@@ -163,6 +167,7 @@
     updated: function () {
       this.$nextTick(function () {
         this.waitAminute();
+
       })
     },
     mounted() {
@@ -186,6 +191,28 @@
     },
 
     methods: {
+    //  formatNumber(){
+       // let defaultVal = document.querySelector(".filter");
+       // let att = document.createAttribute("value");       // Create a "class" attribute
+      //  att.value = this.currently.humidity;
+      //  att.value = att.value * 100;// Set the value of the class attribute
+      //  defaultVal.setAttributeNode(att);
+     //   this.formatted = att.value;
+
+        // let aa = document.querySelectorAll("[id='cont']");
+        //    aa[1].innerText = aa[1].innerHTML.replace("%","");
+       //    aa[1].innerText = aa[1].innerText * 100;
+       // aa[2].innerText = aa[2].innerHTML.replace("%","");
+
+
+      // let aa = document.querySelectorAll("[id='cont']");
+     //   for(let i=0;i<=aa.length;i++)
+      //  {
+      //    aa[i].innerText = aa[i].innerHTML.replace("%","");
+     //     aa[i].innerText = aa[i].innerText * 100;
+
+      // }
+     // },
       // flickr
       search() {
         this.loading = true;
@@ -215,12 +242,6 @@
         })
       },
       waitAminute: function () {
-        // let aa = document.querySelectorAll("[id='cont']").value();
-        // for(let i=0;i<=aa.length;i++)
-        // {
-        //   aa[i].innerText = aa[i].innerText.replace("%","");
-
-        //   }
 
         this.ps = placeSearch({
           key: 'dlWrWcvQDTvdOpJqrIkkepoKexYGixQa',
@@ -249,7 +270,8 @@
           this.cityDisplay = e.result.city;
           this.stateDisplay = e.result.state;
           this.search();
-        });
+
+;        });
       }
     }
   }
