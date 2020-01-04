@@ -52,22 +52,20 @@
                 <h4>Precipitation</h4>
                 <progress-bar
                     :options="options"
-                    v-bind:value="currently.precipitation"
-                />
+                    v-bind:value="currently.precipitation"></progress-bar>
               </div>
               <div class="cell filter">
                 <h4>Humidity</h4>
                 <progress-bar
                     :options="options"
-                    v-bind:value="currently.humidity | numeral('0b')"
-                />
+                    v-bind:value="currently.humidity"></progress-bar>
               </div>
               <div class="cell">
                 <h4>UV Index</h4>
                 <progress-bar
                     :options="options"
-                    v-bind:value="currently.uvIndex"
-                />
+                    v-bind:value="newIndexNumber"
+                ></progress-bar>
               </div>
             </div>
             <div class="grid-x">
@@ -108,10 +106,12 @@
     name: 'app',
     data() {
       return {
+        newIndexNumber: '',
+        newHumidityNumber: '',
+        it: 'manatee',
         loading: false,
         tag: '',
         formatted: 0,
-        newNum: '',
         images: [],
         address: '',
         latNum: '0',
@@ -125,15 +125,16 @@
         hourly: '',
         daily: '',
         alerts: '',
+        foo: 'hey',
         options: {
           text: {
             color: '#fff',
-            shadowEnable: false,
+            shadowEnable: true,
             shadowColor: '#000000',
             fontSize: 50,
             fontFamily: 'Helvetica',
             dynamicPosition: false,
-            hideText: false
+            hideText: true
           },
           progress: {
             color: '#71F0FF',
@@ -163,6 +164,7 @@
         default: 64
       },
 
+
     },
     updated: function () {
       this.$nextTick(function () {
@@ -177,6 +179,7 @@
           this.daily = response.data.daily;
           this.hourly = response.data.hourly;
           this.alerts = response.data.alerts;
+          this.newHumidityNumber = this.currently.humidity * 10;
         });
     },
     computed: {
@@ -191,28 +194,33 @@
     },
 
     methods: {
-    //  formatNumber(){
-       // let defaultVal = document.querySelector(".filter");
+
+      formatNumber(){
+        this.newIndexNumber = this.currently.uvIndex * 10
+
+        // let defaultVal = document.querySelector(".filter");
        // let att = document.createAttribute("value");       // Create a "class" attribute
       //  att.value = this.currently.humidity;
       //  att.value = att.value * 100;// Set the value of the class attribute
       //  defaultVal.setAttributeNode(att);
      //   this.formatted = att.value;
 
-        // let aa = document.querySelectorAll("[id='cont']");
+        // let aa = document.querySelectorAll("[style='cont']");
         //    aa[1].innerText = aa[1].innerHTML.replace("%","");
        //    aa[1].innerText = aa[1].innerText * 100;
        // aa[2].innerText = aa[2].innerHTML.replace("%","");
 
 
-      // let aa = document.querySelectorAll("[id='cont']");
-     //   for(let i=0;i<=aa.length;i++)
-      //  {
-      //    aa[i].innerText = aa[i].innerHTML.replace("%","");
-     //     aa[i].innerText = aa[i].innerText * 100;
+      let aa = document.querySelectorAll(".progress-bar  div");
 
-      // }
-     // },
+        for(let i=0;i<=aa.length;i++)
+        {
+         // aa[i].innerText = aa[i].innerHTML.replace("%","");
+          //aa[i].innerText = aa[i].innerText * 100;
+          aa[2].innerText = this.currently.uvIndex *10;
+
+        }
+     },
       // flickr
       search() {
         this.loading = true;
@@ -266,6 +274,8 @@
               this.daily = response.data.daily;
               this.hourly = response.data.hourly;
               this.alerts = response.data.alerts;
+              this.newHumidityNumber = this.currently.humidity * 100;
+              this.newIndexNumber = this.currently.uvIndex * 10
             });
           this.cityDisplay = e.result.city;
           this.stateDisplay = e.result.state;
