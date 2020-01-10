@@ -2,16 +2,16 @@
   <div id="app">
     <div class="grid-container fluid">
       <div class="grid-x grid-margin-x">
-        <div class="cell small-3">
+
+        <div class="cell medium-6 large-4">
           <h5>Search For A Location</h5>
           <input type="search" id="search-input" placeholder="Start Searching..."/>
           <form>
             <input class="fakeInput" v-model="tagSearch" type="text">
             <button type="submit" class="go-button fakeInput" @click.prevent="search">Search</button>
-<button @click.prevent="formatNumber">format</button>
           </form>
         </div>
-        <div class="cell auto">
+        <div class="cell medium-6 large-8 ">
           <div class="grid-y grid-margin-y">
             <div class="cell main-image-parent">
               <div v-for="image in images" :key="image.id">
@@ -29,7 +29,7 @@
                 </div>
               </div>
               Daily Forecast
-              <div class="grid-x align-spaced small-up-2 medium-up-4 large-up-8">
+              <div class="grid-x customGrid align-spaced small-up-2 medium-up-4 large-up-8">
                 <div class="cell small-1" v-for="hour in hourly.data.slice(0, 5)">
                   <h3>{{ hour.time | moment("h a") }}</h3>
                   <skycon v-bind:condition="hour.icon"/>
@@ -44,29 +44,29 @@
                 <skycon v-bind:condition="day.icon"/>
                 <p>{{ day.temperatureHigh}}&#176;</p>
                 <p>{{ day.temperatureLow}}&#176;</p>
-
               </div>
             </div>
-            <div class=" grid-x align-spaced small-up-2 medium-up-2 large-up-3">
-              <div class="cell">
+            <div class="grid-x customGrid  grid-padding-x small-up-1 medium-up-2 large-up-3">
+              <div class="cell alternate-color">
                 <h4>Precipitation</h4>
                 <progress-bar
                     :options="options"
-                    v-bind:value="currently.precipitation"></progress-bar>
+                    v-bind:value="newPrecipValue"></progress-bar>
               </div>
-              <div class="cell filter">
+              <div class="cell alternate-color">
                 <h4>Humidity</h4>
-                <progress-bar
-                    :options="options"
-                    v-bind:value="currently.humidity"></progress-bar>
+                <progress-bar ref="changeTheColor"
+                              :options="options"
+                              v-bind:value="newHumidityNumber"></progress-bar>
               </div>
-              <div class="cell">
+              <div class="cell alternate-color">
                 <h4>UV Index</h4>
                 <progress-bar
                     :options="options"
-                    v-bind:value="newIndexNumber"
+                    v-bind:value="newIndexValue"
                 ></progress-bar>
               </div>
+
             </div>
             <div class="grid-x">
               <div class="cell">
@@ -102,13 +102,12 @@
   import axios from 'axios';
 
   export default {
-
     name: 'app',
     data() {
       return {
-        newIndexNumber: '',
+        newIndexValue: '',
         newHumidityNumber: '',
-        it: 'manatee',
+        newPrecipValue: '',
         loading: false,
         tag: '',
         formatted: 0,
@@ -125,16 +124,15 @@
         hourly: '',
         daily: '',
         alerts: '',
-        foo: 'hey',
         options: {
           text: {
             color: '#fff',
             shadowEnable: true,
             shadowColor: '#000000',
-            fontSize: 50,
+            fontSize: 30,
             fontFamily: 'Helvetica',
             dynamicPosition: false,
-            hideText: true
+            hideText: false
           },
           progress: {
             color: '#71F0FF',
@@ -144,10 +142,10 @@
             height: 150,
             width: 150,
             verticalTextAlign: 90,
-            horizontalTextAlign: 70,
+            horizontalTextAlign: 0,
             zeroOffset: 0,
             strokeWidth: 10,
-            progressPadding: 0,
+            progressPadding: 90,
             type: 'circle'
           }
         },
@@ -163,24 +161,27 @@
         type: Number,
         default: 64
       },
-
-
     },
     updated: function () {
       this.$nextTick(function () {
         this.waitAminute();
-
+        this.formatNumber();
+        this.formatUvColor();
       })
     },
     mounted() {
+
       axios.get("https://cors-anywhere.herokuapp.com/https://api.darksky.net/forecast/051b6680f036e325eecb49001964cdae/27.496,-82.594")
         .then((response) => {
           this.currently = response.data.currently;
           this.daily = response.data.daily;
           this.hourly = response.data.hourly;
           this.alerts = response.data.alerts;
-          this.newHumidityNumber = this.currently.humidity * 10;
+          this.newHumidityNumber = this.currently.humidity * 100;
+          this.newPrecipValue = this.currently.precipProbability * 100
         });
+      this.search();
+this.tagSearch();
     },
     computed: {
       tagSearch() {
@@ -192,35 +193,30 @@
         this.search();
       },
     },
-
     methods: {
-
-      formatNumber(){
-        this.newIndexNumber = this.currently.uvIndex * 10
-
-        // let defaultVal = document.querySelector(".filter");
-       // let att = document.createAttribute("value");       // Create a "class" attribute
-      //  att.value = this.currently.humidity;
-      //  att.value = att.value * 100;// Set the value of the class attribute
-      //  defaultVal.setAttributeNode(att);
-     //   this.formatted = att.value;
-
-        // let aa = document.querySelectorAll("[style='cont']");
-        //    aa[1].innerText = aa[1].innerHTML.replace("%","");
-       //    aa[1].innerText = aa[1].innerText * 100;
-       // aa[2].innerText = aa[2].innerHTML.replace("%","");
-
-
-      let aa = document.querySelectorAll(".progress-bar  div");
-
-        for(let i=0;i<=aa.length;i++)
-        {
-         // aa[i].innerText = aa[i].innerHTML.replace("%","");
-          //aa[i].innerText = aa[i].innerText * 100;
-          aa[2].innerText = this.currently.uvIndex *10;
-
+      formatUvColor() {
+        this.newIndexValue = this.currently.uvIndex * 10;
+        let bb = document.querySelectorAll(" circle");
+        if (this.newIndexValue <= 20) {
+          bb[5].setAttribute('style', 'stroke:#289500');
+        } else if (this.newIndexValue === 40) {
+          bb[5].setAttribute('style', 'stroke:#F7E400');
+        }else if (this.newIndexValue <= 50) {
+          bb[5].setAttribute('style', 'stroke:#F85900');
+        }else if (this.newIndexValue <= 70) {
+          bb[5].setAttribute('style', 'stroke:blue');
+        }else if (this.newIndexValue <= 100) {
+          bb[5].setAttribute('style', 'stroke:#D80010');
+        }else{
+          bb[5].setAttribute('style', 'stroke:#6B49C8');
         }
-     },
+      },
+      formatNumber() {
+        let aa = document.querySelectorAll(".progress-bar  div");
+        for (let i = 0; i <= aa.length; i++) {
+          aa[2].innerText = this.currently.uvIndex;
+        }
+      },
       // flickr
       search() {
         this.loading = true;
@@ -244,13 +240,10 @@
             nojsoncallback: 1,
             per_page: 1,
             sort: 'interestingness-desc'
-
-
           }
         })
       },
       waitAminute: function () {
-
         this.ps = placeSearch({
           key: 'dlWrWcvQDTvdOpJqrIkkepoKexYGixQa',
           container: document.querySelector('#search-input'),
@@ -261,7 +254,6 @@
             'adminArea',
           ]
         });
-
         this.ps.on('change', (e) => {
           this.latNum = e.result.latlng.lat;
           this.longNum = e.result.latlng.lng;
@@ -275,23 +267,27 @@
               this.hourly = response.data.hourly;
               this.alerts = response.data.alerts;
               this.newHumidityNumber = this.currently.humidity * 100;
-              this.newIndexNumber = this.currently.uvIndex * 10
+              this.newPrecipValue = this.currently.precipProbability * 100
             });
           this.cityDisplay = e.result.city;
           this.stateDisplay = e.result.state;
-          this.search();
-
-;        });
+        });
       }
     }
   }
 </script>
 <style>
+.customGrid{
+
+  margin-top: 10px
+}
   #app {
     background-color: #444444;
     color: #fff
   }
+.grid-x {
 
+}
   .fakeInput {
     display: none
   }
@@ -321,7 +317,6 @@
   .main-image-parent {
     position: relative;
     z-index: 1;
-    border: 2px solid green;
     overflow: hidden;
   }
 
@@ -334,16 +329,16 @@
     top: 0;
     margin-top: 0;
     min-height: 100%;
-
     margin-right: 0;
     background-repeat: no-repeat;
     background-size: cover;
     opacity: 0.3;
-
     z-index: -1;
-    border: 2px solid red
   }
+  .progress-bar[data-v-8248d938] {
+width: auto
 
+}
   img {
     display: inline !important;
   }
